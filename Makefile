@@ -244,8 +244,8 @@ analyze:
 # Documentation
 .PHONY: docs
 docs:
-	@echo "=== Generating Documentation ==="
-	doxygen ./docs/Doxyfile || echo "Create Doxyfile for documentation"
+	@echo "=== Generating Documentation (m.css dark) ==="
+	@PROJECT_NUMBER=$(VERSION) ./docs/Doxygen/gen_docs.sh
 
 # Memory check (limited use for RT systems, but useful for correctness)
 .PHONY: memcheck

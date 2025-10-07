@@ -1,0 +1,68 @@
+name: Docs (GitHub Pages)
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'README.md'
+      - 'docs/Doxygen/**'
+      - 'Makefile'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz curl
+
+      # Optional: show versions to help debugging
+      - name: Tool versions
+        run: |
+          doxygen --version || true
+          dot -V || true
+
+      - name: Build docs
+        run: |
+          make docs
+          # prevent Jekyll from mangling assets
+          touch docs/Doxygen/build/html/.nojekyll
+          # optional: custom domain via repo variable or secret
+          if [ -n "${{ vars.PAGES_CNAME || secrets.PAGES_CNAME }}" ]; then
+            echo "${{ vars.PAGES_CNAME || secrets.PAGES_CNAME }}" > docs/Doxygen/build/html/CNAME
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/Doxygen/build/html
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

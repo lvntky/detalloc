@@ -1,0 +1,97 @@
+# --------------------------------------------------------------
+# detalloc — Doxygen (doxygen-awesome-css dark)   Doxygen 1.9.4+
+# Path: docs/Doxygen/Doxyfile
+# --------------------------------------------------------------
+
+# Project
+PROJECT_NAME           = "detalloc: Deterministic Real-Time Allocator"
+PROJECT_NUMBER         = $PROJECT_NUMBER
+PROJECT_BRIEF          = "C99 constant-time pool allocator for hard real-time"
+OUTPUT_DIRECTORY       = docs/Doxygen/build
+CREATE_SUBDIRS         = NO
+
+# Input (only existing paths for now)
+INPUT                  = include src README.md docs/Doxygen/mainpage.md
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.c *.md
+EXCLUDE_PATTERNS       = */obj/* */build/* */tests/* */benchmarks/*
+
+# Language / extraction
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = NO
+
+# Preprocessor
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+PREDEFINED             = \
+  DETALLOC_API(x)=x \
+  DET_INLINE=static inline \
+  DET_DEFAULT_BLOCK_SIZE=64 \
+  DET_DEFAULT_ALIGN=8
+
+# Source browsing
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+# Warnings
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+WARN_FORMAT            = "$file:$line: $text"
+
+# Diagrams
+HAVE_DOT               = YES          # gen_docs.sh will flip to NO if dot missing
+INTERACTIVE_SVG        = YES
+DOT_IMAGE_FORMAT       = svg
+DOT_TRANSPARENT        = YES
+DOT_NUM_THREADS        = 0
+# (Remove CLASS_DIAGRAMS — obsolete in 1.9.4+)
+
+# HTML
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_DYNAMIC_SECTIONS  = YES
+HTML_TIMESTAMP         = NO
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+SEARCHENGINE           = YES
+
+# doxygen-awesome-css: files are placed under docs/Doxygen/awesome/
+HTML_EXTRA_STYLESHEET  = \
+  awesome/doxygen-awesome.css \
+  awesome/doxygen-awesome-sidebar-only.css \
+  style/detalloc.css
+
+HTML_EXTRA_FILES       = \
+  awesome/doxygen-awesome-darkmode-toggle.js
+
+# Apply a small customization via HTML_HEAD/FOOT to inject the toggle (optional)
+HTML_HEADER            =
+HTML_FOOTER            =
+# The toggle can also be auto-inserted by the JS without header/footer.
+
+# Markdown
+USE_MDFILE_AS_MAINPAGE = docs/Doxygen/mainpage.md
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+# Other outputs
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+GENERATE_XML           = NO
+
+# Misc
+QUIET                  = NO
+
+HTML_EXTRA_STYLESHEET  = \
+  awesome/doxygen-awesome.css \
+  awesome/doxygen-awesome-sidebar-only.css \
+  awesome/doxygen-awesome-dark.css \
+  style/detalloc.css
