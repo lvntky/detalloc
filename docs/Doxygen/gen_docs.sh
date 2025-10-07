@@ -13,7 +13,7 @@ mkdir -p "${OUT_DIR}" "${STYLE_DIR}" "${AWESOME_DIR}"
 # ...
 if [ ! -f "${AWESOME_DIR}/doxygen-awesome.css" ]; then
   echo "Downloading doxygen-awesome-css assets…"
-  base="https://raw.githubusercontent.com/jothepro/doxygen-awesome-css/v2.3.4"
+  base="https://raw.githubusercontent.com/jothepro/doxygen-awesome-css/refs/heads/main"
   curl -fsSL "${base}/doxygen-awesome.css"                -o "${AWESOME_DIR}/doxygen-awesome.css"
   curl -fsSL "${base}/doxygen-awesome-sidebar-only.css"   -o "${AWESOME_DIR}/doxygen-awesome-sidebar-only.css"
   curl -fsSL "${base}/doxygen-awesome-dark.css"           -o "${AWESOME_DIR}/doxygen-awesome-dark.css"   # <— add this
