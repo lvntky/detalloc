@@ -2,8 +2,9 @@
  * @file detalloc.h
  * @brief Detalloc — Phase 1: Single-Pool, Constant-Time Allocator
  *
- * Minimal API for a fixed-size, bitmap-based pool allocator with O(1) alloc/free.
- * Designed for hard real-time use; no syscalls after init; uses user-provided memory.
+ * Minimal API for a fixed-size, bitmap-based pool allocator with O(1)
+ * alloc/free. Designed for hard real-time use; no syscalls after init; uses
+ * user-provided memory.
  *
  * @version 0.1.0
  * @date 2025
@@ -19,9 +20,9 @@ extern "C" {
 /* ========================================================================== */
 /* Includes                                                                   */
 /* ========================================================================== */
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 /* ========================================================================== */
 /* Visibility / Inline                                                        */
@@ -31,15 +32,15 @@ extern "C" {
  * @brief Export/import macro for building/using shared libraries.
  */
 #ifndef DETALLOC_API
-#  if defined(_WIN32) && !defined(__GNUC__)
-#    ifdef DETALLOC_BUILD
-#      define DETALLOC_API __declspec(dllexport)
-#    else
-#      define DETALLOC_API __declspec(dllimport)
-#    endif
-#  else
-#    define DETALLOC_API __attribute__((visibility("default")))
-#  endif
+#if defined(_WIN32) && !defined(__GNUC__)
+#ifdef DETALLOC_BUILD
+#define DETALLOC_API __declspec(dllexport)
+#else
+#define DETALLOC_API __declspec(dllimport)
+#endif
+#else
+#define DETALLOC_API __attribute__((visibility("default")))
+#endif
 #endif
 
 /**
@@ -47,11 +48,11 @@ extern "C" {
  * @brief Always-inline helper for hot-path functions where supported.
  */
 #ifndef DET_INLINE
-#  if defined(__GNUC__) || defined(__clang__)
-#    define DET_INLINE static inline __attribute__((always_inline))
-#  else
-#    define DET_INLINE static inline
-#  endif
+#if defined(__GNUC__) || defined(__clang__)
+#define DET_INLINE static inline __attribute__((always_inline))
+#else
+#define DET_INLINE static inline
+#endif
 #endif
 
 /* ========================================================================== */
@@ -76,7 +77,7 @@ extern "C" {
 
 /** Align up helper. */
 #ifndef DET_ALIGN_UP
-#define DET_ALIGN_UP(sz, a) ( ((sz) + ((a)-1)) & ~((a)-1) )
+#define DET_ALIGN_UP(sz, a) (((sz) + ((a)-1)) & ~((a)-1))
 #endif
 
 /* ========================================================================== */
@@ -86,12 +87,12 @@ extern "C" {
  * @brief Error/status codes returned by Detalloc.
  */
 typedef enum {
-    DET_OK = 0,              /**< Operation successful */
-    DET_ERR_INVALID_PARAM,   /**< A parameter is invalid */
-    DET_ERR_OUT_OF_MEMORY,   /**< Buffer cannot accommodate configuration */
-    DET_ERR_POOL_FULL,       /**< Pool has no free blocks */
-    DET_ERR_INVALID_PTR,     /**< Pointer not owned by allocator/pool */
-    DET_ERR_NOT_INITIALIZED  /**< Allocator not initialized */
+  DET_OK = 0,             /**< Operation successful */
+  DET_ERR_INVALID_PARAM,  /**< A parameter is invalid */
+  DET_ERR_OUT_OF_MEMORY,  /**< Buffer cannot accommodate configuration */
+  DET_ERR_POOL_FULL,      /**< Pool has no free blocks */
+  DET_ERR_INVALID_PTR,    /**< Pointer not owned by allocator/pool */
+  DET_ERR_NOT_INITIALIZED /**< Allocator not initialized */
 } det_error_t;
 
 /* ========================================================================== */
@@ -115,10 +116,10 @@ typedef struct det_allocator det_allocator_t;
  * @brief Phase-1 configuration: one fixed-size pool.
  */
 typedef struct {
-    size_t block_size;   /**< Size of each block in bytes (e.g., 64). */
-    size_t num_blocks;   /**< Number of blocks in the pool. */
-    size_t align;        /**< Alignment for allocations (default DET_DEFAULT_ALIGN). */
-    bool   thread_safe;  /**< Optional: enable internal locking (constant-time). */
+  size_t block_size; /**< Size of each block in bytes (e.g., 64). */
+  size_t num_blocks; /**< Number of blocks in the pool. */
+  size_t align; /**< Alignment for allocations (default DET_DEFAULT_ALIGN). */
+  bool thread_safe; /**< Optional: enable internal locking (constant-time). */
 } det_config_t;
 
 /* ========================================================================== */
@@ -151,8 +152,7 @@ DETALLOC_API size_t det_alloc_size(const det_config_t *config);
  * @par Complexity
  * O(1).
  */
-DETALLOC_API det_allocator_t *det_alloc_init(void *memory,
-                                             size_t size,
+DETALLOC_API det_allocator_t *det_alloc_init(void *memory, size_t size,
                                              const det_config_t *config);
 
 /**
@@ -237,11 +237,14 @@ DETALLOC_API const char *det_version_string(void);
 /* Macros                                                                     */
 /* ========================================================================== */
 /** Allocate a typed object (one fixed-size block must fit it). */
-#define DET_NEW(alloc, type) ((type*)det_alloc((alloc)))
+#define DET_NEW(alloc, type) ((type *)det_alloc((alloc)))
 
 /** Free and null a pointer. */
-#define DET_FREE(alloc, ptr) \
-    do { det_free((alloc), (ptr)); (ptr) = NULL; } while (0)
+#define DET_FREE(alloc, ptr)                                                   \
+  do {                                                                         \
+    det_free((alloc), (ptr));                                                  \
+    (ptr) = NULL;                                                              \
+  } while (0)
 
 #ifdef __cplusplus
 } /* extern "C" */

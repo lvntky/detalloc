@@ -10,6 +10,8 @@ AR = ar
 RANLIB = ranlib
 RM = rm -f
 MKDIR = mkdir -p
+CLANG_TIDY = clang-tidy
+CPPCHECK = cppcheck
 
 # Directories
 SRC_DIR = src
@@ -57,6 +59,19 @@ BASE_LDFLAGS = -pthread -lm
 DEBUG_LDFLAGS = $(BASE_LDFLAGS) -fsanitize=address -fsanitize=undefined
 RELEASE_LDFLAGS = $(BASE_LDFLAGS)
 LDFLAGS = $(BASE_LDFLAGS)
+
+# clang-tidy configuration
+TIDY_CONFIG = .clang-tidy
+TIDY_CHECKS = -checks=*
+TIDY_FLAGS = --config-file=$(TIDY_CONFIG)
+TIDY_COMPILE_FLAGS = -- $(CFLAGS)
+
+# cppcheck MISRA configuration
+CPPCHECK_FLAGS = --enable=all --std=c99
+CPPCHECK_FLAGS += --suppress=missingIncludeSystem
+CPPCHECK_FLAGS += --inline-suppr -I$(INC_DIR)
+CPPCHECK_FLAGS += --error-exitcode=1
+CPPCHECK_MISRA_FLAGS = --addon=misra
 
 # Library names
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT).a
@@ -235,12 +250,98 @@ format:
 	@find $(SRC_DIR) $(INC_DIR) $(TEST_DIR) $(BENCH_DIR) $(EXAMPLE_DIR) \
 		-name '*.c' -o -name '*.h' | xargs clang-format -i
 
-# Static analysis
+# ============================================================================
+# MISRA C / Static Analysis Targets
+# ============================================================================
+
+# clang-tidy check (MISRA-aligned checks)
+.PHONY: tidy
+tidy:
+	@echo "=== clang-tidy Analysis (MISRA-aligned) ==="
+	@if [ ! -f $(TIDY_CONFIG) ]; then \
+		echo "ERROR: $(TIDY_CONFIG) not found!"; \
+		echo "Run 'make tidy-init' to create configuration"; \
+		exit 1; \
+	fi
+	@for src in $(SOURCES); do \
+		echo "Checking $$src..."; \
+		$(CLANG_TIDY) $(TIDY_FLAGS) $$src $(TIDY_COMPILE_FLAGS) || exit 1; \
+	done
+	@echo "✓ clang-tidy checks passed"
+
+# clang-tidy fix (auto-fix issues)
+.PHONY: tidy-fix
+tidy-fix:
+	@echo "=== clang-tidy Auto-Fix ==="
+	@if [ ! -f $(TIDY_CONFIG) ]; then \
+		echo "ERROR: $(TIDY_CONFIG) not found!"; \
+		exit 1; \
+	fi
+	@for src in $(SOURCES); do \
+		echo "Fixing $$src..."; \
+		$(CLANG_TIDY) $(TIDY_FLAGS) --fix $$src $(TIDY_COMPILE_FLAGS); \
+	done
+	@echo "✓ Auto-fixes applied"
+
+# Initialize clang-tidy configuration (download from repository)
+.PHONY: tidy-init
+tidy-init:
+	@if [ -f $(TIDY_CONFIG) ]; then \
+		echo "$(TIDY_CONFIG) already exists"; \
+	else \
+		echo "ERROR: $(TIDY_CONFIG) not found!"; \
+		echo "Please create .clang-tidy file in project root"; \
+		echo "You can copy it from the provided configuration"; \
+		exit 1; \
+	fi
+
+# cppcheck with MISRA addon
+.PHONY: misra
+misra:
+	@echo "=== MISRA C Compliance Check (cppcheck) ==="
+	@if ! command -v $(CPPCHECK) >/dev/null 2>&1; then \
+		echo "ERROR: cppcheck not found. Install with: sudo apt-get install cppcheck"; \
+		exit 1; \
+	fi
+	@echo "Note: Full MISRA checking requires misra.txt with rule texts"
+	@if [ -f misra.txt ]; then \
+		echo "Found misra.txt - running full MISRA checks..."; \
+		$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_MISRA_FLAGS) $(SRC_DIR); \
+	else \
+		echo "Warning: misra.txt not found - running partial checks"; \
+		echo "To get full MISRA checking:"; \
+		echo "  1. Obtain MISRA C:2012 document"; \
+		echo "  2. Create misra.txt with rule texts"; \
+		$(CPPCHECK) $(CPPCHECK_FLAGS) $(SRC_DIR); \
+	fi
+
+# Combined static analysis
 .PHONY: analyze
-analyze:
-	@echo "=== Static Analysis ==="
-	cppcheck --enable=all --std=c99 --suppress=missingIncludeSystem \
-		--inline-suppr -I$(INC_DIR) $(SRC_DIR)
+analyze: tidy
+	@echo "=== Static Analysis (cppcheck) ==="
+	$(CPPCHECK) $(CPPCHECK_FLAGS) $(SRC_DIR)
+	@echo "✓ Static analysis complete"
+
+# Full compliance check (tidy + MISRA + analysis)
+.PHONY: compliance
+compliance: tidy misra
+	@echo ""
+	@echo "=== Compliance Check Summary ==="
+	@echo "✓ clang-tidy checks passed"
+	@echo "✓ MISRA C checks completed"
+	@echo "✓ All compliance checks passed"
+
+# Check before commit
+.PHONY: pre-commit
+pre-commit: format compliance test
+	@echo ""
+	@echo "=== Pre-Commit Checks Complete ==="
+	@echo "✓ Code formatted"
+	@echo "✓ Compliance verified"
+	@echo "✓ Tests passed"
+	@echo "Ready to commit!"
+
+# ============================================================================
 
 # Documentation
 .PHONY: docs
@@ -303,6 +404,15 @@ help:
 	@echo "  stress-test      - Stress test under load"
 	@echo "  memcheck         - Check for memory leaks"
 	@echo ""
+	@echo "MISRA C / Compliance Targets:"
+	@echo "  tidy             - Run clang-tidy (MISRA-aligned checks)"
+	@echo "  tidy-fix         - Auto-fix clang-tidy issues"
+	@echo "  tidy-init        - Create .clang-tidy configuration"
+	@echo "  misra            - Run MISRA C checks (cppcheck)"
+	@echo "  analyze          - Run static analysis"
+	@echo "  compliance       - Full compliance check (tidy + MISRA)"
+	@echo "  pre-commit       - Run all checks before commit"
+	@echo ""
 	@echo "Benchmark Targets:"
 	@echo "  benchmarks       - Build benchmarks"
 	@echo "  bench            - Run all benchmarks"
@@ -316,7 +426,6 @@ help:
 	@echo "  uninstall        - Remove installed library"
 	@echo "  clean            - Remove build artifacts"
 	@echo "  format           - Format code with clang-format"
-	@echo "  analyze          - Run static analysis"
 	@echo "  docs             - Generate documentation"
 	@echo "  help             - Show this help"
 

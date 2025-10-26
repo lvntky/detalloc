@@ -4,6 +4,6 @@
 #include <stdio.h>
 
 int main() {
-	printf("%s\n", det_version_string());
-	return 0;
+  printf("%s\n", det_version_string());
+  return 0;
 }

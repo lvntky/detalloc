@@ -1,0 +1,71 @@
+---
+# clang-tidy configuration for MISRA C compliance
+# Optimized for real-time embedded systems (C99)
+
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  cppcoreguidelines-avoid-goto,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-no-malloc,
+  cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  cppcoreguidelines-pro-bounds-constant-array-index,
+  cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  cppcoreguidelines-pro-type-reinterpret-cast,
+  cppcoreguidelines-pro-type-union-access,
+  hicpp-*,
+  misc-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-isolate-declaration,
+  -misc-unused-parameters,
+  -cppcoreguidelines-no-malloc
+
+WarningsAsErrors: '*'
+
+CheckOptions:
+  # Variable initialization (MISRA C Rule 9.1)
+  - key: cppcoreguidelines-init-variables.IncludeStyle
+    value: google
+  
+  # Function complexity limits (similar to MISRA C Rule 8.2)
+  - key: readability-function-size.StatementThreshold
+    value: '50'
+  - key: readability-function-size.BranchThreshold
+    value: '10'
+  - key: readability-function-size.ParameterThreshold
+    value: '6'
+  
+  # Naming conventions
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.TypedefCase
+    value: lower_case
+  - key: readability-identifier-naming.StructCase
+    value: lower_case
+  
+  # Pointer usage restrictions
+  - key: cppcoreguidelines-pro-bounds-constant-array-index.GslHeader
+    value: ''
+  
+  # Avoid implicit conversions
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnIntegerNarrowingConversion
+    value: 'true'
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnFloatingPointNarrowingConversion
+    value: 'true'
+
+HeaderFilterRegex: '.*'
+FormatStyle: none
