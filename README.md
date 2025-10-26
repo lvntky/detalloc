@@ -3,6 +3,8 @@
 
 # Detalloc — Deterministic Real-Time Memory Allocator
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b95866b8d7b34aad8dd7e3216d28fc95)](https://app.codacy.com/gh/lvntky/detalloc/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 **Detalloc** is a **constant-time (O(1))**, **deterministic** memory allocator built for **hard real-time systems** and **latency-critical applications**.  
 Every allocation, every free, and every metadata update executes in **predictable, bounded time**.
 
