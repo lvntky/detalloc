@@ -53,9 +53,10 @@ PERF_FLAGS = -O3 -march=native -mtune=native
 PERF_FLAGS += -DNDEBUG -DRT_ALLOC_NO_STATS
 
 # Linker flags
-LDFLAGS = -pthread -lm
-DEBUG_LDFLAGS = $(LDFLAGS) -fsanitize=address -fsanitize=undefined
-RELEASE_LDFLAGS = $(LDFLAGS)
+BASE_LDFLAGS = -pthread -lm
+DEBUG_LDFLAGS = $(BASE_LDFLAGS) -fsanitize=address -fsanitize=undefined
+RELEASE_LDFLAGS = $(BASE_LDFLAGS)
+LDFLAGS = $(BASE_LDFLAGS)
 
 # Library names
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT).a
@@ -85,19 +86,19 @@ all: release
 # Release build
 .PHONY: release
 release: CFLAGS += $(RELEASE_FLAGS)
-release: LDFLAGS = $(RELEASE_LDFLAGS)
+release: LDFLAGS := $(RELEASE_LDFLAGS)
 release: directories $(STATIC_LIB) $(SHARED_LIB)
 
 # Debug build
 .PHONY: debug
 debug: CFLAGS += $(DEBUG_FLAGS)
-debug: LDFLAGS = $(DEBUG_LDFLAGS)
+debug: LDFLAGS := $(DEBUG_LDFLAGS)
 debug: directories $(STATIC_LIB) $(SHARED_LIB)
 
 # Performance build
 .PHONY: perf
 perf: CFLAGS += $(PERF_FLAGS)
-perf: LDFLAGS = $(RELEASE_LDFLAGS)
+perf: LDFLAGS := $(RELEASE_LDFLAGS)
 perf: directories $(STATIC_LIB) $(SHARED_LIB)
 
 # Create directories
@@ -126,7 +127,7 @@ $(SHARED_LIB): $(OBJECTS)
 # Build tests
 .PHONY: tests
 tests: CFLAGS += $(DEBUG_FLAGS)
-tests: LDFLAGS = $(DEBUG_LDFLAGS)
+tests: LDFLAGS := $(DEBUG_LDFLAGS)
 tests: $(STATIC_LIB) $(TEST_BINS)
 
 $(BUILD_DIR)/test_%: $(TEST_DIR)/%.c $(STATIC_LIB)
@@ -136,7 +137,7 @@ $(BUILD_DIR)/test_%: $(TEST_DIR)/%.c $(STATIC_LIB)
 # Build benchmarks
 .PHONY: benchmarks
 benchmarks: CFLAGS += $(RELEASE_FLAGS)
-benchmarks: LDFLAGS = $(RELEASE_LDFLAGS)
+benchmarks: LDFLAGS := $(RELEASE_LDFLAGS)
 benchmarks: $(STATIC_LIB) $(BENCH_BINS)
 
 $(BUILD_DIR)/bench_%: $(BENCH_DIR)/%.c $(STATIC_LIB)

@@ -2,3 +2,6 @@
 *.js
 /docs/Doxygen/awsome/*
 /docs/Doxygen/build/
+/lib
+/obj
+*ex_*

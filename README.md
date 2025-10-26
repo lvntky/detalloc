@@ -1,6 +1,7 @@
-# Detalloc — Deterministic Real-Time Memory Allocator
-
 <img src="./docs/det_logo.png" alt="Detalloc logo" width="480">
+
+
+# Detalloc — Deterministic Real-Time Memory Allocator
 
 **Detalloc** is a **constant-time (O(1))**, **deterministic** memory allocator built for **hard real-time systems** and **latency-critical applications**.  
 Every allocation, every free, and every metadata update executes in **predictable, bounded time**.
